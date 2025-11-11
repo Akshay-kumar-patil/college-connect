@@ -108,7 +108,7 @@ const StaffDashboard = () => {
         posterUrl = publicUrl;
       }
 
-      // Create event
+      // Create event with auto-approval for staff/club
       const { error } = await supabase
         .from('events')
         .insert([{
@@ -120,11 +120,12 @@ const StaffDashboard = () => {
           poster_url: posterUrl,
           registration_link: registrationLink || null,
           organizer_id: user?.id,
+          status: 'approved',
         }]);
 
       if (error) throw error;
 
-      toast.success('Event submitted for approval!');
+      toast.success('Event created and published successfully!');
       setOpen(false);
       resetForm();
       fetchMyEvents();
@@ -286,7 +287,7 @@ const StaffDashboard = () => {
                 </div>
 
                 <Button type="submit" className="w-full" disabled={submitting}>
-                  {submitting ? 'Submitting...' : 'Submit for Approval'}
+                  {submitting ? 'Publishing...' : 'Publish Event'}
                 </Button>
               </form>
             </DialogContent>

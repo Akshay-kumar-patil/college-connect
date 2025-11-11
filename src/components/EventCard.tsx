@@ -11,6 +11,7 @@ interface EventCardProps {
   description: string;
   category: string;
   eventDate: string;
+  eventTime?: string;
   venue: string;
   posterUrl?: string;
   status?: string;
@@ -22,7 +23,8 @@ export const EventCard = ({
   title, 
   description, 
   category, 
-  eventDate, 
+  eventDate,
+  eventTime,
   venue, 
   posterUrl,
   status,
@@ -97,6 +99,7 @@ export const EventCard = ({
               {eventDate && !isNaN(new Date(eventDate).getTime()) 
                 ? format(new Date(eventDate), 'PPP')
                 : 'Date TBA'}
+              {eventTime && ` • ${eventTime}`}
             </span>
           </div>
           <div className="flex items-center gap-2">

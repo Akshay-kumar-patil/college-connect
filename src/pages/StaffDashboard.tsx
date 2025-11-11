@@ -18,7 +18,8 @@ const eventSchema = z.object({
   description: z.string().min(10, 'Description must be at least 10 characters').max(2000),
   category: z.enum(['hackathon', 'technical', 'cultural', 'sports']),
   venue: z.string().min(3, 'Venue is required').max(200),
-  registrationLink: z.string().url('Must be a valid URL').optional().or(z.literal('')),
+  eventTime: z.string().min(1, 'Event time is required'),
+  registrationLink: z.string().url('Must be a valid URL'),
 });
 
 const StaffDashboard = () => {
@@ -35,6 +36,7 @@ const StaffDashboard = () => {
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState<'hackathon' | 'technical' | 'cultural' | 'sports'>('technical');
   const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
   const [venue, setVenue] = useState('');
   const [posterFile, setPosterFile] = useState<File | null>(null);
   const [registrationLink, setRegistrationLink] = useState('');
@@ -86,7 +88,7 @@ const StaffDashboard = () => {
 
     try {
       // Validate form
-      eventSchema.parse({ title, description, category, venue, registrationLink });
+      eventSchema.parse({ title, description, category, venue, eventTime, registrationLink });
 
       let posterUrl = null;
 
@@ -108,6 +110,9 @@ const StaffDashboard = () => {
         posterUrl = publicUrl;
       }
 
+      // Get user's email for organizer field
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+
       // Create event with auto-approval for staff/club
       const { error } = await supabase
         .from('events')
@@ -116,10 +121,12 @@ const StaffDashboard = () => {
           description,
           category,
           event_date: eventDate,
+          event_time: eventTime,
           venue,
           poster_url: posterUrl,
-          registration_link: registrationLink || null,
+          registration_link: registrationLink,
           organizer_id: user?.id,
+          organizer: authUser?.email || '',
           status: 'approved',
         }]);
 
@@ -145,6 +152,7 @@ const StaffDashboard = () => {
     setDescription('');
     setCategory('technical');
     setEventDate('');
+    setEventTime('');
     setVenue('');
     setPosterFile(null);
     setRegistrationLink('');
@@ -197,55 +205,94 @@ const StaffDashboard = () => {
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
-                <DialogTitle>Submit New Event</DialogTitle>
+                <DialogTitle>Upload New Event</DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="title">Event Title</Label>
+                  <Label htmlFor="title">Event Title *</Label>
                   <Input
                     id="title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Enter event title"
                     required
                     disabled={submitting}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Event Description *</Label>
                   <Textarea
                     id="description"
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe your event"
                     rows={4}
                     required
                     disabled={submitting}
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label htmlFor="registrationLink">Google Form Registration Link *</Label>
+                  <Input
+                    id="registrationLink"
+                    type="url"
+                    value={registrationLink}
+                    onChange={(e) => setRegistrationLink(e.target.value)}
+                    placeholder="https://forms.google.com/..."
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="poster">Event Banner *</Label>
+                  <Input
+                    id="poster"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setPosterFile(e.target.files?.[0] || null)}
+                    required
+                    disabled={submitting}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="category">Event Type *</Label>
+                  <Select value={category} onValueChange={(v) => setCategory(v as any)} disabled={submitting}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select event type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="hackathon">Hackathons</SelectItem>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="cultural">Cultural</SelectItem>
+                      <SelectItem value="sports">Sports</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="category">Category</Label>
-                    <Select value={category} onValueChange={(v) => setCategory(v as any)} disabled={submitting}>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="hackathon">Hackathon</SelectItem>
-                        <SelectItem value="technical">Technical</SelectItem>
-                        <SelectItem value="cultural">Cultural</SelectItem>
-                        <SelectItem value="sports">Sports</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="eventDate">Event Date *</Label>
+                    <Input
+                      id="eventDate"
+                      type="date"
+                      value={eventDate}
+                      onChange={(e) => setEventDate(e.target.value)}
+                      required
+                      disabled={submitting}
+                    />
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="eventDate">Event Date</Label>
+                    <Label htmlFor="eventTime">Event Time *</Label>
                     <Input
-                      id="eventDate"
-                      type="datetime-local"
-                      value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
+                      id="eventTime"
+                      type="time"
+                      value={eventTime}
+                      onChange={(e) => setEventTime(e.target.value)}
                       required
                       disabled={submitting}
                     />
@@ -253,35 +300,13 @@ const StaffDashboard = () => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="venue">Venue</Label>
+                  <Label htmlFor="venue">Event Venue *</Label>
                   <Input
                     id="venue"
                     value={venue}
                     onChange={(e) => setVenue(e.target.value)}
+                    placeholder="Enter venue location"
                     required
-                    disabled={submitting}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="poster">Event Poster (Optional)</Label>
-                  <Input
-                    id="poster"
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setPosterFile(e.target.files?.[0] || null)}
-                    disabled={submitting}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="registrationLink">Registration Link (Optional)</Label>
-                  <Input
-                    id="registrationLink"
-                    type="url"
-                    value={registrationLink}
-                    onChange={(e) => setRegistrationLink(e.target.value)}
-                    placeholder="https://..."
                     disabled={submitting}
                   />
                 </div>
@@ -314,9 +339,11 @@ const StaffDashboard = () => {
                   description={event.description}
                   category={event.category}
                   eventDate={event.event_date}
+                  eventTime={event.event_time}
                   venue={event.venue}
                   posterUrl={event.poster_url}
                   status={event.status}
+                  registrationLink={event.registration_link}
                 />
               ))}
             </div>

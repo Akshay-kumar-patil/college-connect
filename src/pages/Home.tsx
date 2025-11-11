@@ -124,6 +124,7 @@ const Home = () => {
                 description={event.description}
                 category={event.category}
                 eventDate={event.event_date}
+                eventTime={event.event_time}
                 venue={event.venue}
                 posterUrl={event.poster_url}
                 registrationLink={event.registration_link}

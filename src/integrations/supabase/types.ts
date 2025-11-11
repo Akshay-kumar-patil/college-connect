@@ -51,9 +51,11 @@ export type Database = {
           created_at: string
           description: string
           event_date: string
+          event_time: string | null
           id: string
           is_pinned: boolean | null
           max_capacity: number | null
+          organizer: string | null
           organizer_id: string
           organizer_role: string | null
           poster_url: string | null
@@ -73,9 +75,11 @@ export type Database = {
           created_at?: string
           description: string
           event_date: string
+          event_time?: string | null
           id?: string
           is_pinned?: boolean | null
           max_capacity?: number | null
+          organizer?: string | null
           organizer_id: string
           organizer_role?: string | null
           poster_url?: string | null
@@ -95,9 +99,11 @@ export type Database = {
           created_at?: string
           description?: string
           event_date?: string
+          event_time?: string | null
           id?: string
           is_pinned?: boolean | null
           max_capacity?: number | null
+          organizer?: string | null
           organizer_id?: string
           organizer_role?: string | null
           poster_url?: string | null

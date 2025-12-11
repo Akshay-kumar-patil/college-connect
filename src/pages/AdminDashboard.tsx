@@ -8,6 +8,7 @@ import { toast } from 'sonner';
 import { Check, X, Trash2, Calendar, MapPin } from 'lucide-react';
 import { format } from 'date-fns';
 import { useAuth } from '@/contexts/AuthContext';
+import { EventUploadForm } from '@/components/EventUploadForm';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -164,9 +165,12 @@ const AdminDashboard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage and approve events</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Admin Dashboard</h1>
+            <p className="text-muted-foreground">Manage and approve events</p>
+          </div>
+          <EventUploadForm onEventCreated={fetchEvents} />
         </div>
 
         {/* Pending Events Section */}

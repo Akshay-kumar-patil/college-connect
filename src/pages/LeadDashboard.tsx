@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Trash2, Ban, UserX, Users, Calendar, TrendingUp } from 'lucide-react';
+import { EventUploadForm } from '@/components/EventUploadForm';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -159,9 +160,12 @@ const LeadDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-secondary/5">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Lead Dashboard</h1>
-          <p className="text-muted-foreground">Complete platform management and analytics</p>
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold mb-2">Lead Dashboard</h1>
+            <p className="text-muted-foreground">Complete platform management and analytics</p>
+          </div>
+          <EventUploadForm onEventCreated={fetchEvents} />
         </div>
 
         {/* Stats Cards */}
